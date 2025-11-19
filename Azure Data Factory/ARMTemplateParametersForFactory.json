@@ -1,0 +1,57 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "value": "supplychain-adf-ss4771"
+        },
+        "GoogleBigQuery1_keyFileContent": {
+            "value": ""
+        },
+        "Snowflake1_password": {
+            "value": ""
+        },
+        "GoogleBigQuery2_keyFileContent": {
+            "value": ""
+        },
+        "Snowflake2_password": {
+            "value": ""
+        },
+        "AzureDataLakeStorage1_accountKey": {
+            "value": ""
+        },
+        "LS_ADLS_Landing_accountKey": {
+            "value": ""
+        },
+        "LS_Blob_Staging_connectionString": {
+            "value": ""
+        },
+        "AzureDatabricks1_Pipeline_accessToken": {
+            "value": ""
+        },
+        "GoogleBigQuery3_keyFileContent": {
+            "value": ""
+        },
+        "Snowflake1_properties_typeProperties_database": {
+            "value": "AZURE_DEMAND_DB"
+        },
+        "Snowflake2_properties_typeProperties_database": {
+            "value": "AZURE_DEMAND_DB"
+        },
+        "AzureBlobStorage1_sasUri": {
+            "value": ""
+        },
+        "AzureDataLakeStorage1_properties_typeProperties_url": {
+            "value": "https://satyastorageadf.dfs.core.windows.net/"
+        },
+        "LS_ADLS_Landing_properties_typeProperties_url": {
+            "value": "https://satyastorageadf.dfs.core.windows.net/"
+        },
+        "LS_Blob_SnowflakeStage_sasUri": {
+            "value": ""
+        },
+        "AzureDatabricks1_Pipeline_properties_typeProperties_existingClusterId": {
+            "value": "1105-082338-3n9yek5n"
+        }
+    }
+}

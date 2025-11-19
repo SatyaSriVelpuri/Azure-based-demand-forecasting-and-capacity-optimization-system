@@ -1,0 +1,959 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name",
+            "defaultValue": "supplychain-adf-ss4771"
+        },
+        "GoogleBigQuery1_keyFileContent": {
+            "type": "secureString",
+            "metadata": "Secure string for 'keyFileContent' of 'GoogleBigQuery1'"
+        },
+        "Snowflake1_password": {
+            "type": "secureString",
+            "metadata": "Secure string for 'password' of 'Snowflake1'"
+        },
+        "GoogleBigQuery2_keyFileContent": {
+            "type": "secureString",
+            "metadata": "Secure string for 'keyFileContent' of 'GoogleBigQuery2'"
+        },
+        "Snowflake2_password": {
+            "type": "secureString",
+            "metadata": "Secure string for 'password' of 'Snowflake2'"
+        },
+        "AzureDataLakeStorage1_accountKey": {
+            "type": "secureString",
+            "metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+        },
+        "LS_ADLS_Landing_accountKey": {
+            "type": "secureString",
+            "metadata": "Secure string for 'accountKey' of 'LS_ADLS_Landing'"
+        },
+        "LS_Blob_Staging_connectionString": {
+            "type": "secureString",
+            "metadata": "Secure string for 'connectionString' of 'LS_Blob_Staging'"
+        },
+        "AzureDatabricks1_Pipeline_accessToken": {
+            "type": "secureString",
+            "metadata": "Secure string for 'accessToken' of 'AzureDatabricks1_Pipeline'"
+        },
+        "GoogleBigQuery3_keyFileContent": {
+            "type": "secureString",
+            "metadata": "Secure string for 'keyFileContent' of 'GoogleBigQuery3'"
+        },
+        "Snowflake1_properties_typeProperties_database": {
+            "type": "string",
+            "defaultValue": "AZURE_DEMAND_DB"
+        },
+        "Snowflake2_properties_typeProperties_database": {
+            "type": "string",
+            "defaultValue": "AZURE_DEMAND_DB"
+        },
+        "AzureBlobStorage1_sasUri": {
+            "type": "secureString",
+            "metadata": "Secure string for 'sasUri' of 'AzureBlobStorage1'"
+        },
+        "AzureDataLakeStorage1_properties_typeProperties_url": {
+            "type": "string",
+            "defaultValue": "https://satyastorageadf.dfs.core.windows.net/"
+        },
+        "LS_ADLS_Landing_properties_typeProperties_url": {
+            "type": "string",
+            "defaultValue": "https://satyastorageadf.dfs.core.windows.net/"
+        },
+        "LS_Blob_SnowflakeStage_sasUri": {
+            "type": "secureString",
+            "metadata": "Secure string for 'sasUri' of 'LS_Blob_SnowflakeStage'"
+        },
+        "AzureDatabricks1_Pipeline_properties_typeProperties_existingClusterId": {
+            "type": "string",
+            "defaultValue": "1105-082338-3n9yek5n"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/ds_adls_snowflake_raw')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_ADLS_Landing",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "Parquet",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@concat('snowflake_supplychain_', formatDateTime(utcNow(),'yyyyMMdd_HHmmss'), '.parquet')\n",
+                            "type": "Expression"
+                        },
+                        "folderPath": "raw/snowflake ",
+                        "fileSystem": "adls-landing"
+                    },
+                    "compressionCodec": "snappy"
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Landing')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/GoogleBigQueryObject1')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "GoogleBigQuery2",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "GoogleBigQueryV2Object",
+                "schema": [],
+                "typeProperties": {
+                    "dataset": "supply_chain_dataset",
+                    "table": "operations_data"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/GoogleBigQuery2')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/ds_snowflake_supplychain')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "Snowflake1",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "SnowflakeV2Table",
+                "schema": [
+                    {
+                        "name": "Product",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Supplier",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Warehouse Location",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Quantity",
+                        "type": "FLOAT",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Unit Price",
+                        "type": "FLOAT",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Total Cost",
+                        "type": "FLOAT",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Delivery Date",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Logistics Partner",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Shipping Method",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Delivery Status",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "DEMAND_SCHEMA",
+                    "table": "SUPPLY_CHAIN_LOGISTICS_CLEANED"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/Snowflake1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/ds_adls_gcp_raw')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_ADLS_Landing",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "Parquet",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@concat('gcp_operations_', formatDateTime(utcNow(),'yyyyMMdd_HHmmss'), '.parquet')\n",
+                            "type": "Expression"
+                        },
+                        "folderPath": "raw/gcp",
+                        "fileSystem": "adls-landing"
+                    },
+                    "compressionCodec": "snappy"
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Landing')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/SnowflakeTable1')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "Snowflake2",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "SnowflakeV2Table",
+                "schema": [
+                    {
+                        "name": "Product",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Supplier",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Warehouse Location",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Quantity",
+                        "type": "FLOAT",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Unit Price",
+                        "type": "FLOAT",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Total Cost",
+                        "type": "FLOAT",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Delivery Date",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Logistics Partner",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Shipping Method",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    },
+                    {
+                        "name": "Delivery Status",
+                        "type": "VARCHAR",
+                        "precision": 0,
+                        "scale": 0
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "DEMAND_SCHEMA",
+                    "table": "SUPPLY_CHAIN_LOGISTICS_DATASET"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/Snowflake2')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/ds_bq_operations')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "GoogleBigQuery3",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "GoogleBigQueryV2Object",
+                "schema": [],
+                "typeProperties": {
+                    "dataset": "supply_chain_dataset",
+                    "table": "supply_chain_cleaned"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/GoogleBigQuery3')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_ADLS_Landing",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "folderPath": "raw/snowflake",
+                        "fileSystem": "adls-landing"
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Landing')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/GoogleBigQuery1')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "GoogleBigQueryV2",
+                "version": "1.1",
+                "typeProperties": {
+                    "projectId": "brilliant-lens-477111-j0",
+                    "authenticationType": "ServiceAuthentication",
+                    "keyFileContent": {
+                        "type": "SecureString",
+                        "value": "[parameters('GoogleBigQuery1_keyFileContent')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/Snowflake1')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "SnowflakeV2",
+                "typeProperties": {
+                    "authenticationType": "Basic",
+                    "accountIdentifier": "ugticsy-rm17258",
+                    "user": "SatyaSri",
+                    "database": "[parameters('Snowflake1_properties_typeProperties_database')]",
+                    "warehouse": "COMPUTE_WH",
+                    "password": {
+                        "type": "SecureString",
+                        "value": "[parameters('Snowflake1_password')]"
+                    }
+                },
+                "version": "1.1"
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/GoogleBigQuery2')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "GoogleBigQueryV2",
+                "version": "1.1",
+                "typeProperties": {
+                    "projectId": "brilliant-lens-477111-j0",
+                    "authenticationType": "ServiceAuthentication",
+                    "keyFileContent": {
+                        "type": "SecureString",
+                        "value": "[parameters('GoogleBigQuery2_keyFileContent')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/Snowflake2')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "SnowflakeV2",
+                "typeProperties": {
+                    "authenticationType": "Basic",
+                    "accountIdentifier": "ugticsy-rm17258",
+                    "user": "SatyaSri",
+                    "database": "[parameters('Snowflake2_properties_typeProperties_database')]",
+                    "warehouse": "COMPUTE_WH",
+                    "password": {
+                        "type": "SecureString",
+                        "value": "[parameters('Snowflake2_password')]"
+                    }
+                },
+                "version": "1.1"
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "sasUri": "[parameters('AzureBlobStorage1_sasUri')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage1')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobFS",
+                "typeProperties": {
+                    "url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]",
+                    "accountKey": {
+                        "type": "SecureString",
+                        "value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/LS_ADLS_Landing')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobFS",
+                "typeProperties": {
+                    "url": "[parameters('LS_ADLS_Landing_properties_typeProperties_url')]",
+                    "accountKey": {
+                        "type": "SecureString",
+                        "value": "[parameters('LS_ADLS_Landing_accountKey')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/LS_Blob_Staging')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "connectionString": "[parameters('LS_Blob_Staging_connectionString')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/LS_Blob_SnowflakeStage')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "sasUri": "[parameters('LS_Blob_SnowflakeStage_sasUri')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureDatabricks1_Pipeline')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureDatabricks",
+                "typeProperties": {
+                    "domain": "https://adb-2252190068396335.15.azuredatabricks.net",
+                    "accessToken": {
+                        "type": "SecureString",
+                        "value": "[parameters('AzureDatabricks1_Pipeline_accessToken')]"
+                    },
+                    "existingClusterId": "[parameters('AzureDatabricks1_Pipeline_properties_typeProperties_existingClusterId')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/GoogleBigQuery3')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "GoogleBigQueryV2",
+                "version": "1.1",
+                "typeProperties": {
+                    "projectId": "brilliant-lens-477111-j0",
+                    "authenticationType": "ServiceAuthentication",
+                    "keyFileContent": {
+                        "type": "SecureString",
+                        "value": "[parameters('GoogleBigQuery3_keyFileContent')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/pipe_ingest_to_adls')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Snowflake",
+                        "type": "Copy",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "SnowflakeV2Source",
+                                "exportSettings": {
+                                    "type": "SnowflakeExportCopyCommand"
+                                }
+                            },
+                            "sink": {
+                                "type": "ParquetSink",
+                                "storeSettings": {
+                                    "type": "AzureBlobFSWriteSettings"
+                                },
+                                "formatSettings": {
+                                    "type": "ParquetWriteSettings"
+                                }
+                            },
+                            "enableStaging": true,
+                            "stagingSettings": {
+                                "linkedServiceName": {
+                                    "referenceName": "LS_Blob_SnowflakeStage",
+                                    "type": "LinkedServiceReference"
+                                },
+                                "path": "adls-landing/snowflake_stage/"
+                            },
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "mappings": [
+                                    {
+                                        "source": {
+                                            "name": "PRODUCT",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "PRODUCT",
+                                            "type": "String"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "SUPPLIER",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "SUPPLIER",
+                                            "type": "String"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "WAREHOUSE_LOCATION",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "WAREHOUSE_LOCATION",
+                                            "type": "String"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "QUANTITY",
+                                            "type": "Double"
+                                        },
+                                        "sink": {
+                                            "name": "QUANTITY",
+                                            "type": "Double"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "UNIT_PRICE",
+                                            "type": "Double"
+                                        },
+                                        "sink": {
+                                            "name": "UNIT_PRICE",
+                                            "type": "Double"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "TOTAL_COST",
+                                            "type": "Double"
+                                        },
+                                        "sink": {
+                                            "name": "TOTAL_COST",
+                                            "type": "Double"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "DELIVERY_DATE",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "DELIVERY_DATE",
+                                            "type": "String"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "LOGISTICS_PARTNER",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "LOGISTICS_PARTNER",
+                                            "type": "String"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "SHIPPING_METHOD",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "SHIPPING_METHOD",
+                                            "type": "String"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "DELIVERY_STATUS",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "DELIVERY_STATUS",
+                                            "type": "String"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "ds_snowflake_supplychain",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "ds_adls_snowflake_raw",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "GCP",
+                        "type": "Copy",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "GoogleBigQueryV2Source"
+                            },
+                            "sink": {
+                                "type": "ParquetSink",
+                                "storeSettings": {
+                                    "type": "AzureBlobFSWriteSettings"
+                                },
+                                "formatSettings": {
+                                    "type": "ParquetWriteSettings"
+                                }
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "mappings": [
+                                    {
+                                        "source": {
+                                            "name": "Product",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "Product",
+                                            "type": "String",
+                                            "physicalType": "UTF8"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "Supplier",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "Supplier",
+                                            "type": "String",
+                                            "physicalType": "UTF8"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "Warehouse_Location",
+                                            "type": "String"
+                                        },
+                                        "sink": {
+                                            "name": "Warehouse_Location",
+                                            "type": "String",
+                                            "physicalType": "UTF8"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "Quantity",
+                                            "type": "Int64"
+                                        },
+                                        "sink": {
+                                            "name": "Quantity",
+                                            "type": "Int64",
+                                            "physicalType": "INT_64"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "Unit_Price",
+                                            "type": "Double"
+                                        },
+                                        "sink": {
+                                            "name": "Unit_Price",
+                                            "type": "Double",
+                                            "physicalType": "DOUBLE"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "Total_Cost",
+                                            "type": "Double"
+                                        },
+                                        "sink": {
+                                            "name": "Total_Cost",
+                                            "type": "Double",
+                                            "physicalType": "DOUBLE"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "name": "Delivery_Date",
+                                            "type": "DateTime"
+                                        },
+                                        "sink": {
+                                            "name": "Delivery_Date",
+                                            "type": "DateTime",
+                                            "physicalType": "INT_96"
+                                        }
+                                    }
+                                ],
+                                "typeConversion": true,
+                                "typeConversionSettings": {
+                                    "allowDataTruncation": true,
+                                    "treatBooleanAsNumber": false
+                                }
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "ds_bq_operations",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "ds_adls_gcp_raw",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Bronze_layer",
+                        "type": "DatabricksNotebook",
+                        "dependsOn": [
+                            {
+                                "activity": "GCP",
+                                "dependencyConditions": [
+                                    "Completed"
+                                ]
+                            },
+                            {
+                                "activity": "Snowflake",
+                                "dependencyConditions": [
+                                    "Completed"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "notebookPath": "/Workspace/Users/satyasrivelpuri@gmail.com/Bronze_Layer"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks1_Pipeline",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "Silver_layer",
+                        "type": "DatabricksNotebook",
+                        "dependsOn": [
+                            {
+                                "activity": "Bronze_layer",
+                                "dependencyConditions": [
+                                    "Completed"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "notebookPath": "/Workspace/Users/satyasrivelpuri@gmail.com/Silver_layer"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks1_Pipeline",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "Gold_layer-ML",
+                        "type": "DatabricksNotebook",
+                        "dependsOn": [
+                            {
+                                "activity": "Silver_layer",
+                                "dependencyConditions": [
+                                    "Completed"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "notebookPath": "/Workspace/Users/satyasrivelpuri@gmail.com/Gold_layer"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks1_Pipeline",
+                            "type": "LinkedServiceReference"
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2025-11-18T08:49:26Z"
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/datasets/ds_snowflake_supplychain')]",
+                "[concat(variables('factoryId'), '/datasets/ds_adls_snowflake_raw')]",
+                "[concat(variables('factoryId'), '/datasets/ds_bq_operations')]",
+                "[concat(variables('factoryId'), '/datasets/ds_adls_gcp_raw')]",
+                "[concat(variables('factoryId'), '/linkedServices/AzureDatabricks1_Pipeline')]",
+                "[concat(variables('factoryId'), '/linkedServices/LS_Blob_SnowflakeStage')]"
+            ]
+        }
+    ]
+}
