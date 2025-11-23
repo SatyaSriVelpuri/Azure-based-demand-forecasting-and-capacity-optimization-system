@@ -8,24 +8,6 @@ It brings together data from **Snowflake**, **Google Cloud Platform**, and **API
 
 ---
 
-## 🏛️ Architecture
-
-![Architecture](Architecture.jpeg)
-
-This architecture shows the entire workflow from data ingestion to ML modeling and dashboard visualization.
-
----
-
-## 🎥 Demo Video
-
-A demonstration of the full workflow is included below:
-
-[▶️ Project Demo — Click to Play](Azure-Based Demand Forecasting and Capacity Optimization Project Overview.mp4)
-
-![Demo Video Preview](assets/images/Dashboard1.png)
-
----
-
 ## 1. 📂 Data Sources
 
 The solution merges three enterprise-wide data sources:
