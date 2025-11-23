@@ -20,9 +20,9 @@ This architecture shows the entire workflow from data ingestion to ML modeling a
 
 A demonstration of the full workflow is included below:
 
-[▶️ Project Demo — Click to Play](mahiba_demo_video_AzureProject.mp4)
+[▶️ Project Demo — Click to Play](Azure-Based Demand Forecasting and Capacity Optimization Project Overview.mp4)
 
-![Demo Video Preview](assets/images/demo_preview.png)
+![Demo Video Preview](assets/images/Dashboard1.png)
 
 ---
 
@@ -165,13 +165,4 @@ The solution significantly improves Azure’s **capacity planning**, helps reduc
 ## 📄 License
 
 This project is licensed under the **MIT License**.
-
----
-
-If you want, I can:
-✔ add badges (build, stars, views)
-✔ add a folder structure diagram
-✔ add a professional deployment section
-
-Just tell me!
 
