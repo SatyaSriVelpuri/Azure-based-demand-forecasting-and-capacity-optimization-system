@@ -10,8 +10,6 @@ It brings together data from **Snowflake**, **Google Cloud Platform**, and **API
 ![Architecture](Architecture.jpg)
 
 
-## 🎬 Demo Video
-[Watch the demo video](Azure-Based Demand Forecasting and Capacity Optimization Project.mp4)
 
 
 
