@@ -6,6 +6,12 @@ This project implements a complete end-to-end **cloud-based forecasting and capa
 
 It brings together data from **Snowflake**, **Google Cloud Platform**, and **API sources**, processes them through an Azure Lakehouse architecture, trains high‑accuracy ML models, and visualizes insights for capacity planning.
 
+## 🏛 Architecture
+![Architecture](Architecture.jpg)
+
+## 🎬 Demo Video
+[Watch the demo video](Azure-Based Demand Forecasting and Capacity Optimization Project.mp4)
+
 ---
 
 ## 1. 📂 Data Sources
