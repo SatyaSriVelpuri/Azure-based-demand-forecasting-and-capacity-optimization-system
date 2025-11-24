@@ -10,6 +10,8 @@ It brings together data from **Snowflake**, **Google Cloud Platform**, and **API
 ![Architecture](Architecture.jpg)
 
 
+## 🎬 Demo Video
+[Watch the demo video](https://drive.google.com/file/d/1_mX5YT6OQXDLUtmwcSn7K44LzK3eUVvJ/view?usp=sharing)
 
 
 
